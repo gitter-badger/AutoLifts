@@ -5,12 +5,12 @@ import com.twitter.algebird._
 import export._
 
 //TODO: put somewhere else
-//@reexports[AlgeLiftF]
+@reexports[AlgeLiftF]
 object Algebird
 
 trait AlgeLiftF[Obj, Function] extends LiftF[Obj, Function]
 
-@exports[AlgeLiftF]
+@exports(Subclass)
 object AlgeLiftF extends LowPriorityAlgeLiftF{
 	def apply[Obj, Function](implicit lift: AlgeLiftF[Obj, Function]): Aux[Obj, Function, lift.Out] = lift
 
@@ -31,4 +31,13 @@ trait LowPriorityAlgeLiftF{
 
 			def apply(fg: F[G], f: Function) = functor.map(fg){ g: G => lift(g, f) }
 		}
+}
+
+trait AlgeLiftAp[Obj, Fn] extends LiftAp[Obj, Fn]
+
+@exports(Subclass)
+object AlgeLiftAp extends LowPriorityAlgeLiftAp
+
+trait LowPriorityAlgeLiftAp{
+	type Aux[Obj, Function, Out0] = AlgeLiftAp[Obj, Function]{ type Out = Out0 }
 }

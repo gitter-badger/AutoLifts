@@ -1,6 +1,7 @@
 package autolift
 
 import scalaz.{Functor, Apply, Applicative, Bind, Foldable, Monoid, MonadPlus}
+import export._
 
 object Lifters extends Lifters
 
@@ -204,7 +205,7 @@ object LiftF extends LowPriorityLiftF {
 		}
 }
 
-trait LowPriorityLiftF{
+trait LowPriorityLiftF extends LowestPriorityLiftF{
 	type Aux[Obj, Function, Out0] = LiftF[Obj, Function]{ type Out = Out0 }
 
 	implicit def recur[F[_], G, Function](implicit functor: Functor[F], lift: LiftF[G, Function]): Aux[F[G], Function, F[lift.Out]] =
@@ -214,6 +215,9 @@ trait LowPriorityLiftF{
 			def apply(fg: F[G], f: Function) = functor.map(fg){ g: G => lift(g, f) }
 		}
 }
+
+@imports[LiftF]
+trait LowestPriorityLiftF
 
 /**
  * Type class supporting the applicative mapping of a type over another type of arbitrary nested type constructors.
