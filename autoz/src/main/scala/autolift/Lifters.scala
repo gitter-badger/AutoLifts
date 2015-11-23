@@ -194,30 +194,8 @@ trait LowPriorityLiftIntoF{
  */
 trait LiftF[Obj, Function] extends DFunction2[Obj, Function]
 
-object LiftF extends LowPriorityLiftF {
-	def apply[Obj, Function](implicit lift: LiftF[Obj, Function]): Aux[Obj, Function, lift.Out] = lift
-
-	implicit def base[F[_], A, C >: A, B](implicit functor: Functor[F]): Aux[F[A], C => B, F[B]] =
-		new LiftF[F[A], C => B]{
-			type Out = F[B]
-
-			def apply(fa: F[A], f: C => B) = functor.map(fa)(f)
-		}
-}
-
-trait LowPriorityLiftF extends LowestPriorityLiftF{
-	type Aux[Obj, Function, Out0] = LiftF[Obj, Function]{ type Out = Out0 }
-
-	implicit def recur[F[_], G, Function](implicit functor: Functor[F], lift: LiftF[G, Function]): Aux[F[G], Function, F[lift.Out]] =
-		new LiftF[F[G], Function]{
-			type Out = F[lift.Out]
-
-			def apply(fg: F[G], f: Function) = functor.map(fg){ g: G => lift(g, f) }
-		}
-}
-
 @imports[LiftF]
-trait LowestPriorityLiftF
+object LiftF
 
 /**
  * Type class supporting the applicative mapping of a type over another type of arbitrary nested type constructors.
@@ -227,7 +205,7 @@ trait LowestPriorityLiftF
  * @tparam Obj The type of object to be lifted into.
  * @tparam Funciton The type of function to be lifted.
  */
-sealed trait LiftAp[Obj, Function] extends DFunction2[Obj, Function]
+trait LiftAp[Obj, Function] extends DFunction2[Obj, Function]
 
 object LiftAp extends LowPriorityLiftAp {
 	def apply[Obj, Function](implicit lift: LiftAp[Obj, Function]): Aux[Obj, Function, lift.Out] = lift
@@ -240,7 +218,7 @@ object LiftAp extends LowPriorityLiftAp {
 		}
 }
 
-trait LowPriorityLiftAp{
+trait LowPriorityLiftAp extends LowestPriorityLiftAp{
 	type Aux[Obj, Function, Out0] = LiftAp[Obj, Function]{ type Out = Out0 }
 
 	implicit def recur[F[_], G, Function](implicit functor: Functor[F], lift: LiftAp[G, Function]): Aux[F[G], Function, F[lift.Out]] =
@@ -251,6 +229,9 @@ trait LowPriorityLiftAp{
 		}
 }
 
+@imports[LiftAp]
+trait LowestPriorityLiftAp
+
 /**
  * Type class supporting flat mapping a function over an arbitrary nesting of type constructors.
  *
@@ -259,7 +240,7 @@ trait LowPriorityLiftAp{
  * @tparam Obj The type to be lifted into.
  * @tparam Funciton The function to be lifted.
  */
-sealed trait LiftB[Obj, Function] extends DFunction2[Obj, Function]
+trait LiftB[Obj, Function] extends DFunction2[Obj, Function]
 
 object LiftB extends LowPriorityLiftB {
 	def apply[Obj, Function](implicit lift: LiftB[Obj, Function]): Aux[Obj, Function, lift.Out] = lift
